@@ -12,6 +12,7 @@ void myMouseEventHandler(int event, int x, int y, int flags, void *)
     cv::Point pt(x, y);
 
     if(event == cv::EVENT_LBUTTONDOWN) prevPt = pt;
+    /*
     if(flags & cv::EVENT_FLAG_LBUTTON)
     {
         cv::line(inpaint_mask, prevPt, pt, cv::Scalar(255), 5, 8, 0);
@@ -19,6 +20,13 @@ void myMouseEventHandler(int event, int x, int y, int flags, void *)
         prevPt = pt;
         cv::imshow("image", whiteLined_image);
     }
+    */
+    if(event == cv::EVENT_LBUTTONUP) {
+        cv::rectangle(inpaint_mask,prevPt,pt,cv::Scalar::all(255),-1);
+        cv::rectangle(whiteLined_image,prevPt,pt,cv::Scalar::all(255),-1);
+        cv::imshow("image", whiteLined_image);
+    };
+
 }
 
 int main(int argc, char *argv[])
@@ -71,7 +79,11 @@ int main(int argc, char *argv[])
             original_image.copyTo(whiteLined_image);
             cv::imshow("image", whiteLined_image);
             break;
-
+        //参照はオリジナルにする
+        case 'n':
+            cv::bitwise_not(original_image, whiteLined_image, inpaint_mask);
+            cv::imshow("image", whiteLined_image);
+            break;
         case 'i':
         case 10: // ENTER(LF)
         case 13: // ENTER(CR)
