@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     cv::Mat lower_img, upper_img, tmp_img;
     cv::Mat dst_img, msk_img;
 
+    cv::Mat fruits = cv::imread("fruits.jpg");
+
     // 1. initialize VideoCapture
     if(argc > 1){
         std::string in_name = argv[1];
@@ -48,6 +50,22 @@ int main(int argc, char *argv[])
     cap >> frame;
 
     cv::Size s = frame.size();
+
+    // ---変更: fruits.jpg を検証し、フレームと同じサイズ・チャンネルに揃える---
+    if (fruits.empty()) {
+        printf("ERROR: cannot load fruits.jpg (背景画像を読み込めません)\n");
+        return 0;
+    }
+    // チャンネル数をBGR(3ch)へ正規化
+    if (fruits.channels() == 4) {
+        cv::cvtColor(fruits, fruits, cv::COLOR_BGRA2BGR);
+    } else if (fruits.channels() == 1) {
+        cv::cvtColor(fruits, fruits, cv::COLOR_GRAY2BGR);
+    }
+    // サイズをフレームと一致させる
+    if (fruits.size() != s) {
+        cv::resize(fruits, fruits, s);
+    }
 
     avg_img.create(s, CV_32FC3);
     sgm_img.create(s, CV_32FC3);
@@ -112,7 +130,8 @@ int main(int argc, char *argv[])
         cv::bitwise_not(msk_img, msk_img);
         cv::accumulateWeighted(tmp_img, sgm_img, T_PARAM, msk_img);
 
-        dst_img = cv::Scalar(0);
+        //dst_img = cv::Scalar(0);
+        fruits.copyTo(dst_img);
         frame.copyTo(dst_img, msk_img);
 
         cv::imshow("Input", frame);
